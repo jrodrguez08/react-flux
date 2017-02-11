@@ -8,6 +8,9 @@ import source from 'vinyl-source-stream';
 import babelify from 'babelify';
 import concat from 'gulp-concat';
 import sass from 'gulp-sass'
+import eslint from 'gulp-eslint';
+import browserSync from 'browser-sync';
+import minifyCSS from 'gulp-cssmin';
 import gulpConfig from './config';
 
 const config = gulpConfig();
@@ -39,20 +42,40 @@ gulp.task('js', () => {
         .bundle()
         .pipe(source('bundle.js'))
         .pipe(gulp.dest(`${config.paths.dist}/scripts`))
-        .pipe(connect.reload());
+        .pipe(browserSync.reload({
+            stream: true
+        }));
 });
 
-gulp.task('css', () => {
-    gulp.src(config.paths.css)
+gulp.task('lint', () => {
+    gulp.src(config.paths.js)
+        .pipe(eslint({configFile: 'eslint.json'}))
+        .pipe(eslint.format());
+});
+
+gulp.task('sass', () => {
+    gulp.src(config.paths.css.main)
         .pipe(concat('bundle.css'))
         .pipe(sass().on('error', sass.logError))
+        .pipe(minifyCSS())
         .pipe(gulp.dest(`${config.paths.dist}/css`))
+        .pipe(browserSync.reload({
+            stream: true
+        }));
 });
 
-gulp.task('watch', () => {
+gulp.task('browserSync', () => {
+    browserSync.init({
+        server: {
+            baseDir: 'dist'
+        },
+    })
+});
+
+gulp.task('watch', ['browserSync'], () => {
     gulp.watch(config.paths.html, ['html']);
-    gulp.watch(config.paths.js, ['js']);
-    gulp.watch(config.paths.css, ['css']);
+    gulp.watch(config.paths.js, ['js', 'lint']);
+    gulp.watch([config.paths.css.global], ['sass']);
 });
 
-gulp.task('default', ['html', 'js', 'css', 'open', 'watch']);
+gulp.task('default', ['html', 'js', 'sass', 'lint', 'open', 'watch']);

@@ -1,0 +1,23 @@
+@import "../base/base";
+
+.header {
+
+  &__list {
+    background: $black;
+    line-height: 42px;
+    padding: 0 60px;
+  }
+
+  &__item {
+    display: inline-block;
+    color: $white;
+    padding-right: 20px;
+
+    &:last-child {
+      padding-right: 0;
+    }
+
+  }
+
+}
+//header
