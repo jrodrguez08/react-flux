@@ -1,3 +1,3 @@
 # react-flux
 
-Project using react and redux
+Project using react and flux
